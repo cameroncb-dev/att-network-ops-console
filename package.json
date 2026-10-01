@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start -H 0.0.0.0 -p 43123",
     "lint": "eslint",
-    "check:agent": "tsx scripts/check-agent.ts"
+    "check:agent": "tsx scripts/check-agent.ts",
+    "export:powerbi": "tsx scripts/export-powerbi.ts",
+    "check:powerbi": "tsx scripts/check-powerbi.ts"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

@@ -1,0 +1,39 @@
+// Paste each block as its own measure on fact_incidents.
+// Logic matches the console Analytics page (lib/incidents/metrics.ts).
+//
+// SLA Attainment % uses sla_met / sla_evaluated.
+// Evaluated rows are met, missed, or breached. Open incidents still inside
+// the SLA window (within or at-risk) are not in the denominator.
+// Format this measure as Percentage, one decimal place. Unfiltered seed: 61.8%.
+//
+// MTTR Hours averages resolve_hours. That column is blank on open incidents
+// and is (resolved_at - opened_at) in hours on Resolved and Closed records.
+// Format as a decimal number, one decimal place. Unfiltered seed: 12.0.
+//
+// Open Incidents counts is_open = 1 (New, In Progress, On Hold).
+// Outcome "Resolved" on the fact includes Closed, matching the donut on Analytics.
+// Unfiltered seed: 52 incidents, 24 open, 28 resolved.
+
+Incident Count =
+COUNTROWS ( fact_incidents )
+
+Open Incidents =
+CALCULATE (
+    [Incident Count],
+    fact_incidents[is_open] = 1
+)
+
+SLA Attainment % =
+DIVIDE (
+    SUM ( fact_incidents[sla_met] ),
+    SUM ( fact_incidents[sla_evaluated] )
+)
+
+MTTR Hours =
+AVERAGEX (
+    FILTER (
+        fact_incidents,
+        NOT ISBLANK ( fact_incidents[resolve_hours] )
+    ),
+    fact_incidents[resolve_hours]
+)

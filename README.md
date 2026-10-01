@@ -8,7 +8,7 @@ The records are fictional. There is no production connection to AT&T, ServiceNow
 
 - Filter the incident queue by priority, state, assignment group, and service, then open a record.
 - On an incident, read the SLA, assignment, and work notes. Update state and assignment group, or add a work note. Changes stay in browser memory for the session.
-- Open Analytics for volume by service and region, open versus resolved, SLA attainment, mean time to resolve, and a 14-day trend.
+- Open Analytics for volume by service and region, open versus resolved, SLA attainment, mean time to resolve, and a 14-day trend. The same seed is exported for Power BI Desktop under `powerbi/`.
 - Run the Ops Agent on the open queue or on one incident. The trace shows the plan, each tool call, and the tool result tied to incident numbers. Apply the recommendation to update that record.
 
 The operations clock is frozen at 01 Oct 2026 22:00 UTC so SLA math does not drift. Session notes are stamped a minute apart after that clock.
@@ -17,7 +17,7 @@ Empty, loading, and error states are part of the feed. Append `?feed=down` to th
 
 ## How this maps to the internship skills
 
-**Data analytics.** The analytics view is computed from the same incident records the queue uses. It reports volume by service and region, open versus resolved, SLA attainment (resolved or closed on time, plus open records already past due), mean time to resolve overall and by service, and a daily open/resolve trend. Applying an agent recommendation changes the figures.
+**Data analytics.** The analytics view is computed from the same incident records the queue uses. It reports volume by service and region, open versus resolved, SLA attainment (resolved or closed on time, plus open records already past due), mean time to resolve overall and by service, and a daily open/resolve trend. Applying an agent recommendation changes the in-app figures for that session. Power BI is the analytics tool over this operational data, the same role it plays beside ServiceNow and Azure at AT&T. `powerbi/` is a star schema and the DAX for incident count, open incidents, SLA attainment, and mean time to resolve. You open it in Power BI Desktop. The console does not embed a published report.
 
 **Agentic AI development.** The agent is a real loop, not a scripted chat. `lib/agent/loop.ts` asks a planner for the next action, runs a tool in `lib/agent/tools.ts`, appends the observation, and repeats until the planner recommends or stops. Tools search the feed, summarize one incident, flag repeat configuration items and service-region clusters, recommend an assignment group from CI type plus resolved history, and draft a work note from those results. Queue triage uses the pattern tool to change which incident it picks: `INC0048280` has the highest base SLA risk, and the Dallas metro-ring repeat (`INC0048211`, `INC0048238`, `INC0048244`) outranks it after the pattern weight.
 
@@ -32,6 +32,7 @@ On Azure, the same shape would be:
 - **Web app.** This Next.js app, hosted as an Azure App Service or Azure Container Apps site.
 - **Data store.** The seed JSON stands in for Azure SQL or Cosmos DB holding a read model synced from ServiceNow. The UI already treats the feed as a loadable source with loading and error states.
 - **Azure OpenAI.** `lib/agent/provider.ts` returns the local planner unless `NEXT_PUBLIC_AGENT_PROVIDER=azure-openai`. That setting selects `AzureOpenAIPlanner`, which refuses to run until an endpoint, deployment, and key exist. Tool execution stays in this repo, so a future model would choose tools and the app would still apply them to the incident data. No API key is required for the local loop.
+- **Power BI.** Analysts at AT&T report on operational data that starts in ServiceNow and often lands in Azure. `powerbi/` is that reporting surface for this console: fact and dimension CSVs plus `measures.dax`. Desktop can load the folder with no tenant. Publishing the model to a workspace and embedding it in the web app needs a Power BI license (an AT&T tenant or a free trial), which this repo does not include.
 
 ## Run locally
 
@@ -44,9 +45,10 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123). The dev server listens on
 
 ```bash
 npm run check:agent
+npm run check:powerbi
 ```
 
-That runs the offline agent loop and analytics checks against the seed.
+`check:agent` runs the offline agent loop and analytics checks against the seed. `check:powerbi` checks that the Power BI CSVs still match that seed. `npm run export:powerbi` rewrites the CSVs after a seed change. Desktop steps are in `powerbi/README.md`.
 
 ```bash
 npm run lint

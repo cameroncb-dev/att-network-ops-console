@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { PowerBiPanel } from "@/components/analytics/power-bi-panel"
 import { EmptyCut } from "@/components/feed-states"
 import { formatDay, formatHours, formatPercent } from "@/lib/incidents/format"
 import { computeAnalytics } from "@/lib/incidents/metrics"
@@ -55,6 +56,8 @@ export function AnalyticsView() {
           Figures are computed from the in-memory incident feed, including any state, assignment, or note you apply. SLA attainment counts resolved and closed records that met the clock, plus open records already past due. Open records still inside the window are not scored yet.
         </p>
       </div>
+
+      <PowerBiPanel />
 
       <div className="grid gap-3 rounded-xl bg-card p-3 ring-1 ring-foreground/10 sm:grid-cols-2 lg:max-w-xl">
         <div className="grid gap-1.5">
